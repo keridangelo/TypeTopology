@@ -436,6 +436,8 @@ module group {𝓤 : Universe} where
 
  unit : (G : Group) → ⟨ G ⟩
  unit (X , ((_·_ , e) , i , l , r , a) , γ) = e
+ 
+ syntax unit G = e⟨ G ⟩
 
  group-is-set : (G : Group)
               → is-set ⟨ G ⟩
