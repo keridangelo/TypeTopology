@@ -9,7 +9,7 @@ Revision April 27, 2023
 
 \begin{code}
 
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe --no-sized-types --no-guardedness --auto-inline #-}
 
 open import MLTT.Spartan hiding ( ₀ ; ₁)
 open import UF.PropTrunc
