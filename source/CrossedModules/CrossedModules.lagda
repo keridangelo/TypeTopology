@@ -4,18 +4,19 @@ Keri D'Angelo kd349@cornell.edu
 
 Jul 17, 2021
 
-Revision July 1, 2022
+Revision April 27, 2023
 --------------------------------------------------------------------------------
 
 \begin{code}
 
-{-# OPTIONS --without-K --safe --no-sized-types --no-guardedness --auto-inline #-}
+{-# OPTIONS --without-K --safe #-}
 
 open import MLTT.Spartan hiding ( ₀ ; ₁)
 open import UF.PropTrunc
 open import UF.ImageAndSurjection
 open import UF.FunExt
 open import UF.Subsingletons
+open import UF.Base
 
 open import Groups.Type
 open import Groups.Homomorphisms
@@ -33,25 +34,39 @@ Group Action:
    A group G acts on a group H by automorphisms.
 
    If there is a homomorphism δ : H → G, this action is compatible
-   with the one induced by the inner conjugation on G and H.
+   with the one induced by the inner conjugation on G and H. 
 
 
 \begin{code}
 
 _◂_ : (G : Group 𝓤) (H : Group 𝓥) → 𝓤 ⊔ 𝓥 ̇
-G ◂ H = Σ ρ ꞉ (⟨ G ⟩ → ⟨ H ⟩ → ⟨ H ⟩)
+G ◂ H = Σ ρ ꞉ (⟨ G ⟩ → ⟨ H ⟩ → ⟨ H ⟩) 
       , (∀ {x y : ⟨ G ⟩} {h : ⟨ H ⟩} → (ρ x (ρ y h) ＝ ρ (x ·⟨ G ⟩ y) h)
       × ∀ {x} → (ρ (unit G) x ＝ x)
       × ∀ {g : ⟨ G ⟩} {h h' : ⟨ H ⟩} → ρ g (h ·⟨ H ⟩ h') ＝ (ρ g h) ·⟨ H ⟩ (ρ g h'))
 
+
+_◂'_ : (G : Group 𝓤) (H : Group 𝓥) → 𝓤 ⊔ 𝓥 ̇
+G ◂' H = Σ ρ ꞉ (⟨ G ⟩ → ⟨ H ⟩ → ⟨ H ⟩) 
+        , ((x y : ⟨ G ⟩) (h : ⟨ H ⟩) → (ρ x (ρ y h) ＝ ρ (x ·⟨ G ⟩ y) h))
+        × ((x : ⟨ H ⟩) → (ρ (unit G) x ＝ x))
+        × ((g : ⟨ G ⟩) (h h' : ⟨ H ⟩) → ρ g (h ·⟨ H ⟩ h') ＝ (ρ g h) ·⟨ H ⟩ (ρ g h'))
+
+
 Equivariant : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
 Equivariant G H (ρ , _) δ _ = ∀ {g h} → (δ (ρ g h) ·⟨ G ⟩ g ＝ (g ·⟨ G ⟩ (δ h)))
+
+Equivariant'' : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
+Equivariant'' G H (ρ , _) δ _ = ∀ g h → (δ (ρ g h) ＝ (g ·⟨ G ⟩ (δ h)) ·⟨ G ⟩ (inv G g))
 
 Peiffer-identity : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓥 ̇
 Peiffer-identity _ H (ρ , _) δ _ = ∀ {h₁ h₂} → (((ρ (δ h₁) h₂) ·⟨ H ⟩ h₁) ＝ h₁ ·⟨ H ⟩ h₂)
 
+--Peiffer-identity' : (G : Group 𝓤) (H : Group 𝓥) → G ◂' H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓥 ̇
+--Peiffer-identity' _ H (ρ , _) δ _ = ∀ {h₁ h₂} → (((ρ (δ h₁) h₂) ·⟨ H ⟩ h₁) ＝ h₁ ·⟨ H ⟩ h₂)
+
 Equivariant' : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
-Equivariant' G H (ρ , _) δ _ = (g : ⟨ G ⟩) (h : ⟨ H ⟩)  → (δ (ρ g h) ＝ (g ·⟨ G ⟩ (δ h)) ·⟨ G ⟩ (inv G g))
+Equivariant' G H (ρ , _) δ _ = ∀ (g : ⟨ G ⟩) (h : ⟨ H ⟩) → (δ (ρ g h) ＝ (g ·⟨ G ⟩ (δ h)) ·⟨ G ⟩ (inv G g))
 
 action-carrier : {G : Group 𝓤}{H : Group 𝓥} → G ◂ H → ⟨ G ⟩ → ⟨ H ⟩ → ⟨ H ⟩
 action-carrier ρ g h = (pr₁ ρ) g h
@@ -76,6 +91,17 @@ record CrossedModule : (𝓤 ⊔ 𝓥) ⁺ ̇ where
     peiffer : Peiffer-identity _₀ _₁ ρ ∂ is-∂
 
 
+--record CrossedModule' : (𝓤 ⊔ 𝓥) ⁺ ̇ where
+  --field
+    --_₁ : Group 𝓤
+    --_₀ : Group 𝓥
+    --∂ : ⟨ _₁ ⟩ → ⟨ _₀ ⟩
+    --is-∂ : is-hom _₁ _₀ ∂
+    --ρ' : _₀ ◂' _₁
+    --equivariant : Equivariant'' _₀ _₁ ρ' ∂ is-∂
+    --peiffer : Peiffer-identity' _₀ _₁ ρ' ∂ is-∂
+
+
 
 
 module _ {G : CrossedModule {𝓤} {𝓥}}
@@ -91,7 +117,7 @@ CrossedModule.
 \begin{code}
   open CrossedModule
   record CrossedModuleHom : (𝓤 ⊔ 𝓥 ⊔ 𝓦 ⊔ 𝓣) ⁺ ̇ where
-    field
+    field 
       _₀ : ⟨ G ₀ ⟩ → ⟨ H ₀ ⟩
       is_₀ : is-hom (CrossedModule._₀ G) (CrossedModule._₀ H) _₀
       _₁ : ⟨ G ₁ ⟩ → ⟨ H ₁ ⟩
@@ -103,7 +129,7 @@ CrossedModule.
 -- morphisms
 
   is-CrossMod-hom : (f₀ : ⟨ G ₀ ⟩ → ⟨ H ₀ ⟩) → is-hom ( G ₀) (H ₀) f₀ → (f₁ : ⟨ G ₁ ⟩ → ⟨ H ₁ ⟩) → is-hom (G ₁) (H ₁) f₁ → (𝓤 ⊔ 𝓥 ⊔ 𝓦 ⊔ 𝓣) ̇
-  is-CrossMod-hom f₀ _ f₁ _ = ( ∀ {g} → f₀ (∂ G g) ＝ ∂ H (f₁ g) )
+  is-CrossMod-hom f₀ _ f₁ _ = ( ∀ {g} → f₀ (∂ G g) ＝ ∂ H (f₁ g) ) 
                             × ( ∀ {g h} → f₁ ((pr₁ (ρ G)) g h) ＝ (pr₁ (ρ H)) (f₀ g) (f₁ h) )
 
 
@@ -131,14 +157,14 @@ This is a map (not necessarily a homomorphism)
   -- Alternative definition
   is-left-homotopy' : (f₀ : ⟨ G ₀ ⟩ → ⟨ H ₀ ⟩) → (i₀ : is-hom (G ₀) (H ₀) f₀) →
                       (f₁ : ⟨ G ₁ ⟩ → ⟨ H ₁ ⟩) → (i₁ : is-hom (G ₁) (H ₁) f₁) →
-                      is-CrossMod-hom f₀ i₀ f₁ i₁ →
+                      is-CrossMod-hom f₀ i₀ f₁ i₁ → 
                       (⟨ G ₀ ⟩ → ⟨ H ₁ ⟩) → _
   is-left-homotopy' f₀ _ f₁ _ _ θ = ∀ {x x'} → θ (x ·⟨ G ₀ ⟩ x') ＝ (θ x) ·⟨ H ₁ ⟩ (pr₁ (ρ H) (f₀ x)  (θ x'))
 
 \end{code}
 
 There is an alternative characterization of left homotopy, where we
-give two crossed module homomorphisms and the map θ : ⟨ G ₀ ⟩ → ⟨ H ₁ ⟩ appears
+give two crossed module homomorphisms and the map θ : ⟨ G ₀ ⟩ → ⟨ H ₁ ⟩ appears 
 as the formal analogue of a chain homotopy.
 
 \begin{code}
@@ -159,9 +185,9 @@ as the formal analogue of a chain homotopy.
                        is-CrossMod-hom f₀ i₀ f₁ i₁ →
                        (g₀ : ⟨ G ₀ ⟩ → ⟨ H ₀ ⟩) → (j₀ : is-hom (G ₀) (H ₀) g₀) →
                        (g₁ : ⟨ G ₁ ⟩ → ⟨ H ₁ ⟩) → (j₁ : is-hom (G ₁) (H ₁) g₁) →
-                       is-CrossMod-hom g₀ j₀ g₁ j₁ →
+                       is-CrossMod-hom g₀ j₀ g₁ j₁ → 
                        (⟨ G ₀ ⟩ → ⟨ H ₁ ⟩) → _
-  is-chain-homotopy' f₀ _ f₁ _ _ g₀ _ g₁ _ _ θ
+  is-chain-homotopy' f₀ _ f₁ _ _ g₀ _ g₁ _ _ θ 
                      = (∀ {x} → g₀ x ＝ ((∂ H) (θ x)) ·⟨ H ₀ ⟩ (f₀ x))
                      × (∀ {a x} → g₁ a ·⟨ H ₁ ⟩ θ x ＝ θ (∂ G a ·⟨ G ₀ ⟩ x) ·⟨ H ₁ ⟩ f₁ a)
                      × (∀ {x x'} → θ (x ·⟨ G ₀ ⟩ x') ＝ (θ x) ·⟨ H ₁ ⟩ (pr₁ (ρ H) (f₀ x)  (θ x')))
@@ -174,7 +200,7 @@ module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-trun
   open Groups.Homomorphisms (G ₁) (G ₀) (∂ G) (is-∂ G)
   open PropositionalTruncation pt
   open Groups.Cokernel.cokernel pt fe pe
-
+  
 
   γ : (G : Group 𝓥) → (x y g : ⟨ G ⟩) → (x ＝ y) → (((g ·⟨ G ⟩ x) ·⟨ G ⟩ (inv G g)) ＝ ((g ·⟨ G ⟩ y) ·⟨ G ⟩ (inv G g)))
   γ G x y g p = ap (λ v → ((g ·⟨ G ⟩ v) ·⟨ G ⟩ (inv G g))) p
@@ -193,5 +219,25 @@ module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-trun
   π₀ : Group _
   π₀ = cokernel-gr (G ₁) (G ₀) (∂ G) (is-∂ G) ∂-has-norm-im
 
+  
+
+  ρ'' : (G ₀) ◂ π₁
+  pr₁ ρ'' x y = pr₁ (ρ G) x (pr₁ y) , ( ((equivariant G x (pr₁ y)) ∙ (ℓ x y) ∙ (χ x) ∙ (α x)))
+    where
+     ω : (x : ⟨ G ₀ ⟩) (y : ⟨ π₁ ⟩) → ((x ·⟨ G ₀ ⟩ ((∂ G (pr₁ y))) ＝ x ·⟨ G ₀ ⟩ (unit (G ₀))))
+     ω = λ x y → ap (λ v → (x ·⟨ G ₀ ⟩ v)) (pr₂ y)
+     ℓ : (x : ⟨ G ₀ ⟩) (y : ⟨ π₁ ⟩) → (((x ·⟨ G ₀ ⟩ (∂ G (pr₁ y))) ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ ((x ·⟨ G ₀ ⟩ (unit (G ₀))) ·⟨ G ₀ ⟩ (inv (G ₀) x)))
+     ℓ = λ x y → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (ω x y)
+     χ : (x : ⟨ G ₀ ⟩) → (((x ·⟨ G ₀ ⟩ (unit (G ₀))) ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ (x ·⟨ G ₀ ⟩ (inv (G ₀) x)))
+     χ = λ x → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (unit-right (G ₀) x)
+     α : (x : ⟨ G ₀ ⟩) → ((x ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ unit (G ₀))
+     α = λ x → inv-right (G ₀) x 
+  pr₂ ρ'' = (to-Σ-＝ ((pr₁ (pr₂ (ρ G))) , group-is-set (G ₀) _ _)) , to-Σ-＝ (pr₁ (pr₂ (pr₂ (ρ G))) , group-is-set (G ₀) _ _) , to-Σ-＝ ((pr₂ (pr₂ (pr₂ (ρ G)))) , group-is-set (G ₀) _ _)
+
+
+
+
 
 \end{code}
+
+
