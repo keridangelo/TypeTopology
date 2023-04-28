@@ -222,7 +222,7 @@ module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-trun
   
 
   ρ'' : (G ₀) ◂ π₁
-  pr₁ ρ'' x y = pr₁ (ρ G) x (pr₁ y) , ( ((equivariant G x (pr₁ y)) ∙ (ℓ x y) ∙ (χ x) ∙ (α x)))
+  pr₁ ρ'' x y = pr₁ (ρ G) x (pr₁ y) , ( ((equivariant G x (pr₁ y)) ∙ (ℓ x y) ∙ (χ x) ∙ (inv-right (G ₀) x)))
     where
      ω : (x : ⟨ G ₀ ⟩) (y : ⟨ π₁ ⟩) → ((x ·⟨ G ₀ ⟩ ((∂ G (pr₁ y))) ＝ x ·⟨ G ₀ ⟩ (unit (G ₀))))
      ω = λ x y → ap (λ v → (x ·⟨ G ₀ ⟩ v)) (pr₂ y)
@@ -230,8 +230,6 @@ module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-trun
      ℓ = λ x y → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (ω x y)
      χ : (x : ⟨ G ₀ ⟩) → (((x ·⟨ G ₀ ⟩ (unit (G ₀))) ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ (x ·⟨ G ₀ ⟩ (inv (G ₀) x)))
      χ = λ x → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (unit-right (G ₀) x)
-     α : (x : ⟨ G ₀ ⟩) → ((x ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ unit (G ₀))
-     α = λ x → inv-right (G ₀) x 
   pr₂ ρ'' = (to-Σ-＝ ((pr₁ (pr₂ (ρ G))) , group-is-set (G ₀) _ _)) , to-Σ-＝ (pr₁ (pr₂ (pr₂ (ρ G))) , group-is-set (G ₀) _ _) , to-Σ-＝ ((pr₂ (pr₂ (pr₂ (ρ G)))) , group-is-set (G ₀) _ _)
 
 
