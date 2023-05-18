@@ -17,6 +17,8 @@ open import UF.ImageAndSurjection
 open import UF.FunExt
 open import UF.Subsingletons
 open import UF.Base
+open import UF.Quotient
+open import UF.Large-Quotient
 
 open import Groups.Type
 open import Groups.Homomorphisms
@@ -56,14 +58,14 @@ G ◂' H = Σ ρ ꞉ (⟨ G ⟩ → ⟨ H ⟩ → ⟨ H ⟩)
 Equivariant : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
 Equivariant G H (ρ , _) δ _ = ∀ {g h} → (δ (ρ g h) ·⟨ G ⟩ g ＝ (g ·⟨ G ⟩ (δ h)))
 
-Equivariant'' : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
+Equivariant'' : (G : Group 𝓤) (H : Group 𝓥) → G ◂' H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
 Equivariant'' G H (ρ , _) δ _ = ∀ g h → (δ (ρ g h) ＝ (g ·⟨ G ⟩ (δ h)) ·⟨ G ⟩ (inv G g))
 
 Peiffer-identity : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓥 ̇
 Peiffer-identity _ H (ρ , _) δ _ = ∀ {h₁ h₂} → (((ρ (δ h₁) h₂) ·⟨ H ⟩ h₁) ＝ h₁ ·⟨ H ⟩ h₂)
 
---Peiffer-identity' : (G : Group 𝓤) (H : Group 𝓥) → G ◂' H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓥 ̇
---Peiffer-identity' _ H (ρ , _) δ _ = ∀ {h₁ h₂} → (((ρ (δ h₁) h₂) ·⟨ H ⟩ h₁) ＝ h₁ ·⟨ H ⟩ h₂)
+Peiffer-identity' : (G : Group 𝓤) (H : Group 𝓥) → G ◂' H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓥 ̇
+Peiffer-identity' _ H (ρ , _) δ _ = ∀ {h₁ h₂} → (((ρ (δ h₁) h₂) ·⟨ H ⟩ h₁) ＝ h₁ ·⟨ H ⟩ h₂)
 
 Equivariant' : (G : Group 𝓤) (H : Group 𝓥) → G ◂ H → (δ : ⟨ H ⟩ → ⟨ G ⟩) → (is-hom H G δ) → 𝓤 ⊔ 𝓥 ̇
 Equivariant' G H (ρ , _) δ _ = ∀ (g : ⟨ G ⟩) (h : ⟨ H ⟩) → (δ (ρ g h) ＝ (g ·⟨ G ⟩ (δ h)) ·⟨ G ⟩ (inv G g))
@@ -91,15 +93,17 @@ record CrossedModule : (𝓤 ⊔ 𝓥) ⁺ ̇ where
     peiffer : Peiffer-identity _₀ _₁ ρ ∂ is-∂
 
 
---record CrossedModule' : (𝓤 ⊔ 𝓥) ⁺ ̇ where
-  --field
-    --_₁ : Group 𝓤
-    --_₀ : Group 𝓥
-    --∂ : ⟨ _₁ ⟩ → ⟨ _₀ ⟩
-    --is-∂ : is-hom _₁ _₀ ∂
-    --ρ' : _₀ ◂' _₁
-    --equivariant : Equivariant'' _₀ _₁ ρ' ∂ is-∂
-    --peiffer : Peiffer-identity' _₀ _₁ ρ' ∂ is-∂
+
+
+record CrossedModule' : (𝓤 ⊔ 𝓥) ⁺ ̇ where
+  field
+    _₁' : Group 𝓤
+    _₀' : Group 𝓥
+    ∂' : ⟨ _₁' ⟩ → ⟨ _₀' ⟩
+    is-∂' : is-hom _₁' _₀' ∂'
+    ρ' : _₀' ◂' _₁'
+    equivariant' : Equivariant'' _₀' _₁' ρ' ∂' is-∂'
+    peiffer' : Peiffer-identity' _₀' _₁' ρ' ∂' is-∂'
 
 
 
@@ -194,12 +198,14 @@ as the formal analogue of a chain homotopy.
 
 
 
-module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-truncations-exist) (fe : Fun-Ext) (pe : Prop-Ext)
+module homotopygroups {G : CrossedModule {𝓤} {𝓥}} {H : CrossedModule' {𝓤} {𝓥}}  (pt : propositional-truncations-exist) (fe : Fun-Ext) (pe : Prop-Ext)
   where
   open CrossedModule
+  open CrossedModule'
   open Groups.Homomorphisms (G ₁) (G ₀) (∂ G) (is-∂ G)
   open PropositionalTruncation pt
   open Groups.Cokernel.cokernel pt fe pe
+ 
   
 
   γ : (G : Group 𝓥) → (x y g : ⟨ G ⟩) → (x ＝ y) → (((g ·⟨ G ⟩ x) ·⟨ G ⟩ (inv G g)) ＝ ((g ·⟨ G ⟩ y) ·⟨ G ⟩ (inv G g)))
@@ -211,31 +217,38 @@ module homotopygroups {G : CrossedModule {𝓤} {𝓥}} (pt : propositional-trun
     x , p' ← p
     ∣ (pr₁ (ρ G)) g x , ((equivariant G g x) ∙ (γ (G ₀) (∂ G x) g' g p')) ∣
 
+  ∂'-has-norm-im : Groups.Homomorphisms.has-normal-image (H ₁') (H ₀') (∂' H) (is-∂' H) pt
+  ∂'-has-norm-im g (g' , p) = do
+    x , p' ← p
+    ∣ (pr₁ (ρ' H)) g x , ((equivariant' H g x) ∙ (γ (H ₀') (∂' H x) g' g p')) ∣
+
 
   π₁ : Group (𝓤 ⊔ 𝓥)
   π₁ = kernel (G ₁) (G ₀) (∂ G) (is-∂ G)
 
+  π₁' : Group (𝓤 ⊔ 𝓥)
+  π₁' = kernel (H ₁') (H ₀') (∂' H) (is-∂' H)
 
-  π₀ : Group _
+
+  π₀ : Group ((𝓤 ⁺) ⊔ (𝓥 ⁺))
   π₀ = cokernel-gr (G ₁) (G ₀) (∂ G) (is-∂ G) ∂-has-norm-im
 
-  
+  π₀' : Group ((𝓤 ⁺) ⊔ (𝓥 ⁺))
+  π₀' = cokernel-gr (H ₁') (H ₀') (∂' H) (is-∂' H) ∂'-has-norm-im
 
-  ρ'' : (G ₀) ◂ π₁
-  pr₁ ρ'' x y = pr₁ (ρ G) x (pr₁ y) , ( ((equivariant G x (pr₁ y)) ∙ (ℓ x y) ∙ (χ x) ∙ (inv-right (G ₀) x)))
+
+
+
+  τ : (H ₀') ◂' π₁'
+  pr₁ τ x y = (pr₁ (ρ' H) x (pr₁ y)) , (( ((equivariant' H x (pr₁ y)) ∙ (ℓ x y) ∙ (χ x) ∙ (inv-right (H ₀') x))))
     where
-     ω : (x : ⟨ G ₀ ⟩) (y : ⟨ π₁ ⟩) → ((x ·⟨ G ₀ ⟩ ((∂ G (pr₁ y))) ＝ x ·⟨ G ₀ ⟩ (unit (G ₀))))
-     ω = λ x y → ap (λ v → (x ·⟨ G ₀ ⟩ v)) (pr₂ y)
-     ℓ : (x : ⟨ G ₀ ⟩) (y : ⟨ π₁ ⟩) → (((x ·⟨ G ₀ ⟩ (∂ G (pr₁ y))) ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ ((x ·⟨ G ₀ ⟩ (unit (G ₀))) ·⟨ G ₀ ⟩ (inv (G ₀) x)))
-     ℓ = λ x y → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (ω x y)
-     χ : (x : ⟨ G ₀ ⟩) → (((x ·⟨ G ₀ ⟩ (unit (G ₀))) ·⟨ G ₀ ⟩ (inv (G ₀) x)) ＝ (x ·⟨ G ₀ ⟩ (inv (G ₀) x)))
-     χ = λ x → ap (λ v → (v ·⟨ G ₀ ⟩ (inv (G ₀) x))) (unit-right (G ₀) x)
-  pr₂ ρ'' = (to-Σ-＝ ((pr₁ (pr₂ (ρ G))) , group-is-set (G ₀) _ _)) , to-Σ-＝ (pr₁ (pr₂ (pr₂ (ρ G))) , group-is-set (G ₀) _ _) , to-Σ-＝ ((pr₂ (pr₂ (pr₂ (ρ G)))) , group-is-set (G ₀) _ _)
-
-
-
+        ω : (x : ⟨ H ₀' ⟩) (y : ⟨ π₁' ⟩) → ((x ·⟨ H ₀' ⟩ ((∂' H (pr₁ y))) ＝ x ·⟨ H ₀' ⟩ (unit (H ₀'))))
+        ω = λ x y → ap (λ v → (x ·⟨ H ₀' ⟩ v)) (pr₂ y)
+        ℓ : (x : ⟨ H ₀' ⟩) (y : ⟨ π₁' ⟩) → (((x ·⟨ H ₀' ⟩ (∂' H (pr₁ y))) ·⟨ H ₀' ⟩ (inv (H ₀') x)) ＝ ((x ·⟨ H ₀' ⟩ (unit (H ₀'))) ·⟨ H ₀' ⟩ (inv (H ₀') x)))
+        ℓ = λ x y → ap (λ v → (v ·⟨ H ₀' ⟩ (inv (H ₀') x))) (ω x y)
+        χ : (x : ⟨ H ₀' ⟩) → (((x ·⟨ H ₀' ⟩ (unit (H ₀'))) ·⟨ H ₀' ⟩ (inv (H ₀') x)) ＝ (x ·⟨ H ₀' ⟩ (inv (H ₀') x)))
+        χ = λ x → ap (λ v → (v ·⟨ H ₀' ⟩ (inv (H ₀') x))) (unit-right (H ₀') x)
+  pr₂ τ = (λ x y h → to-Σ-＝ (pr₁ (pr₂ (ρ' H)) x y (pr₁ h) , group-is-set (H ₀') _ _)) , (λ x → to-Σ-＝ (((pr₁ (pr₂ (pr₂ (ρ' H))) (pr₁ x))) , group-is-set (H ₀') _ _)) , λ g h h' → to-Σ-＝ (((pr₂ (pr₂ (pr₂ (ρ' H)))) g (pr₁ h) (pr₁ h')) , group-is-set (H ₀') _ _)
 
 
 \end{code}
-
-
